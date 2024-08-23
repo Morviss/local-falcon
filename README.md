@@ -281,39 +281,7 @@ copy collection-json to the filestore and change the owner ship and change the c
 
 
 
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/go
-{
-	"name": "Nitya",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/go:1-1.21-bullseye",
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers-contrib/features/node-asdf:0": {}
-	},
 
-	"portsAttributes": {
-		"7008": {
-			"label": "rbi_couch"
-		},
-		"7010": {
-			"label": "sbi_couch"
-		},
-		"8091": {
-			"label": "rbi_gsec"
-		},
-		"8092": {
-			"label": "sbi_gsec"
-		},
-		"8093": {
-			"label": "Platform_gsec"
-		},
-		"8094": {
-			"label": "icici_gsec"
-		}
-	},
-	"postCreateCommand": "setup-dev-environment.sh"
-}
 
 
 
