@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: gsec-deployer
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: deployment-helper-pvc
+  namespace: gsec-deployer
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kube-config-pvc
+  namespace: gsec-deployer
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+  storageClassName: standard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: deployment-helper
+  name: deployment-helper
+  namespace: gsec-deployer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deployment-helper
+  template:
+    metadata:
+      labels:
+        app: deployment-helper
+    spec:
+      affinity:
+       nodeAffinity:
+         preferredDuringSchedulingIgnoredDuringExecution:
+           - weight: 100
+             preference:
+               matchExpressions:
+                - key: PROD
+                  operator: In
+                  values:
+                  - WCBDC
+      containers:
+      - command:
+        - /bin/tail
+        - -f
+        - /dev/null
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: CLUSTER_DOMAIN
+          value: gsec.org.in
+        - name: NAMESPACE_SUFFIX
+          value: gs
+        image: repo.npci.org.in:443/vajra/helper-image:v0.1
+        imagePullPolicy: IfNotPresent
+        name: deployer
+        volumeMounts:
+        - mountPath: /data
+          name: deployment-helper
+        - mountPath: /roo/.kubeconfig
+          name: kube-config
+      volumes:
+      - name: deployment-helper
+        persistentVolumeClaim:
+          claimName: deployment-helper-pvc
+      - name: kube-config
+        persistentVolumeClaim:
+          claimName: kube-config-pvc
+status: {}
+
