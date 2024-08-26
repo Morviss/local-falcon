@@ -1,0 +1,93 @@
+# Default values for ca-user.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: "orderer"
+fullnameOverride: ""
+project: yourproject
+
+fabric_actions:
+  cryptogen: true
+
+image:
+  repository: npcioss/hlf-builder
+  pullPolicy: IfNotPresent
+  ## Overrides the image tag whose default is the chart appVersion.
+  tag: "2.4"
+imagePullSecrets: []
+
+## These organizations are the list of initial organizations required to generate the genesis.block file. 
+
+organizations:
+  - org_type: orderer
+    org_name: orderer
+    ica_endpoint: ica-orderer.my-hlf-domain.com:30000
+    cert_path: /root/orderer.pem
+    admin_identity: admin
+    admin_secret: ordererAdminpassword
+    orderer_identities:
+    - identity_name: orderer0-orderer
+      identity_secret: orderer0ordererSamplePassword
+      port: "30000"
+    - identity_name: orderer1-orderer
+      identity_secret: orderer1ordererSamplePassword
+      port: "30000"
+    - identity_name: orderer2-orderer
+      identity_secret: orderer2ordererSamplePassword
+      port: "30000"
+  - org_type: peerorg
+    org_name: first-peer
+    ica_endpoint: ica-first-peer.my-hlf-domain.com:30000
+    cert_path: /root/peerorg.pem
+    admin_identity: admin
+    admin_secret: first-peerAdminSamplePassword
+    anchor_peers:
+    - host: peer0-first-peer.my-hlf-domain.com
+      port: "30000"
+
+channel_artifact_dir: /scripts/channel-artifacts
+base_dir: /scripts/crypto-config
+hlf_domain: my-hlf-domain.com
+orderer_system_channel: "orderer-sys-channel"
+hlf_channel: "mychannel"
+block_file: genesis.block
+config_transaction_filename: channel.tx
+
+tlsca_endpoint: tls-ca.my-hlf-domain.com:30000
+
+filestore_endpoint: http://filestore.my-hlf-domain.com:30001
+filestore_ssl: false # Make it `true` if `filestore_endpoint` is over https.
+
+csr_names_cn: IN
+csr_names_st: Maharashtra
+csr_names_l: Mumbai
+csr_names_o: Your Company Name
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+  # fsGroup: 2000
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+nodeSelector: {}
+tolerations: []
+affinity: {}

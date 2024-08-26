@@ -1,0 +1,182 @@
+{{/*
+Copyright National Payments Corporation of India. All Rights Reserved.
+SPDX-License-Identifier:  GPL-3.0
+*/}}
+
+{{ $IcaEndpoint    := .Values.global.ica_endpoint }}
+{{ $OverrideMspId  := .Values.MspIdOverride }}
+
+{{- range .Values.orderers }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+  labels:
+    {{- include "fabric-orderer.labels" $ | nindent 4 }}
+    app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ $.Values.global.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "fabric-orderer.selectorLabels" $ | nindent 6 }}
+      app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+      {{- if .additionalLabels -}}
+      {{ toYaml .additionalLabels | nindent 6 }}
+      {{- end }}
+  template:
+    metadata:
+      {{- with $.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fabric-orderer.selectorLabels" $ | nindent 8 }}
+        app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+        type: {{ $.Values.project }}-{{ include "fabric-orderer.fullname" $ }}
+        {{- if .additionalLabels -}}
+        {{ toYaml .additionalLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $.Values.global.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+      securityContext:
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: init
+          image: {{ $.Values.init.image.repository }}:{{ $.Values.init.image.tag }}
+          imagePullPolicy: {{ $.Values.global.image.pullPolicy }}
+          command: ["/bin/sh","-c"]
+          args:
+           - /scripts/enroll.sh {{ $IcaEndpoint }} {{ .identity_name }} {{ .identity_secret }} {{ $.Values.ica_tls_cert_file }}
+          volumeMounts:
+           - name: common
+             subPath: functions.sh
+             mountPath: /scripts/functions.sh
+           - name: config
+             subPath: enroll.sh
+             mountPath: /scripts/enroll.sh
+           - name: certs
+             mountPath: {{ $.Values.orderer_cert_base_dir }}
+      containers:
+        - name: {{ $.Chart.Name }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
+          image: "{{ $.Values.global.image.repository }}:{{ $.Values.global.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.global.image.pullPolicy }}
+          workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+          args:
+            - orderer
+          env:
+            - name: ORDERER_GENERAL_GENESISFILE
+              {{- if .block_file }}
+              value: "{{ $.Values.orderer_cert_base_dir }}/{{ .block_file }}"
+              {{- else }}
+              value: "{{ $.Values.orderer_cert_base_dir }}/{{ $.Values.global.block_file }}"
+              {{- end }}
+            - name: ORDERER_GENERAL_LOCALMSPID
+              value: {{ $OverrideMspId | default $.Values.nameOverride }}
+            - name: ORDERER_OPERATIONS_LISTENADDRESS
+              value: 0.0.0.0:8443
+            {{- tpl (toYaml $.Values.global.env) $ | nindent 12 }}
+            - name: ORDERER_METRICS_PROVIDER
+            {{- if eq "prometheus" $.Values.global.metrics.provider }}
+              value: "prometheus"
+            {{- else if eq "statsd" $.Values.global.metrics.provider }}
+              value: "statsd"
+            - name: ORDERER_METRICS_STATSD_NETWORK
+              value: {{ $.Values.global.metrics.statsd.network }}
+            - name: ORDERER_METRICS_STATSD_ADDRESS
+              value: {{ $.Values.global.metrics.statsd.address }}
+            - name: ORDERER_METRICS_STATSD_WRITEINTERVAL
+              value: {{ $.Values.global.metrics.statsd.writeInterval }}
+            {{- else }}
+              value: "disabled"
+            {{- end }}
+            {{- if .additionalEnvironmentVars }}
+            {{- tpl (toYaml .additionalEnvironmentVars) $ | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+          {{- if .livenessProbe }}
+             {{- toYaml .livenessProbe | nindent 12 }}
+          {{- else if not (.disableDefaultLivenessProbe | default $.Values.global.disableDefaultLivenessProbe) }}
+             {{- toYaml $.Values.livenessProbe | nindent 12 }}
+          {{- end }}          
+          startupProbe:
+          {{- if .startupProbe }}
+             {{- toYaml .startupProbe | nindent 12 }}
+          {{- else if not (.disableDefaultStartupProbe | default $.Values.global.disableDefaultStartupProbe) }}
+             {{- toYaml $.Values.startupProbe | nindent 12 }}
+          {{- end }}
+          readinessProbe:
+          {{- if .readinessProbe }}
+             {{- toYaml .readinessProbe | nindent 12 }}
+          {{- else if not (.disableDefaultReadinessProbe | default $.Values.global.disableDefaultReadinessProbe) }}
+             {{- toYaml $.Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+             {{- toYaml (.resources | default $.Values.global.resources) | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.global.containerPort }}
+              protocol: TCP
+          volumeMounts:
+            - mountPath: {{ $.Values.orderer_data_dir }}
+              name: data
+            - mountPath: {{ $.Values.orderer_cert_base_dir }}
+              name: certs
+            - name: common
+              subPath: config.yaml
+              mountPath: {{ $.Values.orderer_cert_base_dir }}/msp/config.yaml
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            {{- if .use_existing_pvc_data }}
+            claimName: {{ .use_existing_pvc_data }}
+            {{- else }}
+            claimName: data-{{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+            {{- end }}
+        - name: certs
+          {{- if (.require_certs_dir_persistence | default $.Values.global.require_certs_dir_persistence) }}
+          persistentVolumeClaim:
+            claimName: cert-{{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+          {{- else }}
+          emptyDir:
+           sizeLimit: {{ $.Values.global.certStorageSize | default "50M" }}
+          {{- end }}          
+        - name: config
+          configMap:
+            name: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}-conf
+            defaultMode: 0777
+        - name: common
+          configMap:
+            name: {{ include "fabric-orderer.fullname" $ }}-common
+            defaultMode: 0777
+      nodeSelector:
+      {{- if .nodeSelector }} 
+        {{- toYaml .nodeSelector | nindent 8 }}
+      {{- else if not (.disableGlobalNodeSelector) }}
+        {{- toYaml $.Values.global.nodeSelector | nindent 8 }}
+      {{- end }}
+      affinity:
+      {{- if .affinity }} 
+        {{- toYaml .affinity | nindent 8 }}
+      {{- else if not (.disableGlobalAffinity) }}
+        {{- toYaml $.Values.global.affinity | nindent 8 }}
+      {{- end }}
+      tolerations:
+      {{- if .tolerations }} 
+        {{- toYaml .tolerations | nindent 8 }}
+      {{- else if not (.disableGlobalTolerations) }}
+        {{- toYaml $.Values.global.tolerations | nindent 8 }}
+      {{- end }}
+{{- end }}

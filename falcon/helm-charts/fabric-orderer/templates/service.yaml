@@ -1,0 +1,50 @@
+{{/*
+Copyright National Payments Corporation of India. All Rights Reserved.
+SPDX-License-Identifier:  GPL-3.0
+*/}}
+
+{{- range .Values.orderers }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+  labels:
+    {{- include "fabric-orderer.labels" $ | nindent 4 }}
+    app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $.Values.global.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ $.Values.global.servicePort }}
+      targetPort: {{ $.Values.global.containerPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "fabric-orderer.selectorLabels" $ | nindent 4 }}
+    app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: operations-{{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+  labels:
+    orderer: {{ .identity_name }}
+    {{- include "fabric-orderer.labels" $ | nindent 4 }}
+    app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $.Values.global.operations.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ $.Values.global.operations.servicePort }}
+      targetPort: 8443
+      protocol: TCP
+      name: {{ $.Values.global.operations.serviceName }}
+  selector:
+    {{- include "fabric-orderer.selectorLabels" $ | nindent 4 }}
+    app: {{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+{{- end }}

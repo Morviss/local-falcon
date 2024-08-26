@@ -1,0 +1,83 @@
+{{/*
+Copyright National Payments Corporation of India. All Rights Reserved.
+SPDX-License-Identifier:  GPL-3.0
+*/}}
+
+{{- $BankName := .Values.nameOverride }}
+
+{{- range .Values.peers }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-{{ include "fabric-peer.name" $ }}
+  labels:
+    {{- include "fabric-peer.labels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .peerServiceType | default $.Values.global.peerServiceType }}
+  ports:
+    - name: peer
+      port: {{ .peerServicePort | default $.Values.global.peerServicePort }}
+      targetPort: 7051
+      protocol: TCP
+  selector:
+    app: {{ .name }}-{{ include "fabric-peer.name" $ }}
+    {{- include "fabric-peer.selectorLabels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+
+{{- if .useCouchDB | default $.Values.global.useCouchDB }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb-{{ .name }}-{{ include "fabric-peer.name" $ }}
+  labels:
+    component: couchdb
+    {{- include "fabric-peer.labels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .couchServiceType | default $.Values.global.couchServiceType }}
+  ports:
+  - name: couchdb
+    port: {{ .couchServicePort | default $.Values.global.couchServicePort }}
+    targetPort: 5984
+    protocol: TCP
+  selector:
+    app: {{ .name }}-{{ include "fabric-peer.name" $ }}
+    {{- include "fabric-peer.selectorLabels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: operations-{{ .name }}-{{ include "fabric-peer.name" $ }}
+  labels:
+    peer: {{ .identity_name }}
+    {{- include "fabric-peer.labels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .operationsServiceType | default $.Values.global.operations.serviceType }}
+  ports:
+    - name: {{ .operationsServiceName | default $.Values.global.operations.serviceName }}
+      port: {{ .operationsServicePort | default $.Values.global.operations.servicePort }}
+      targetPort: 9443
+      protocol: TCP
+  selector:
+    app: {{ .name }}-{{ include "fabric-peer.name" $ }}
+    {{- include "fabric-peer.selectorLabels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+{{- end }}

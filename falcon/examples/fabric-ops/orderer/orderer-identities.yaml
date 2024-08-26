@@ -1,0 +1,74 @@
+# Default values for ca-user.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: "orderer"
+fullnameOverride: ""
+project: yourproject
+
+fabric_actions:
+  identity: true
+
+image:
+  repository: npcioss/hlf-builder
+  pullPolicy: IfNotPresent
+  ## Overrides the image tag whose default is the chart appVersion.
+  tag: "2.4"
+
+csr_names_cn: IN
+csr_names_st: Maharashtra
+csr_names_l: Mumbai
+csr_names_o: Your Company Name
+
+hlf_domain: my-hlf-domain.com
+
+ca_endpoint: ica-orderer.my-hlf-domain.com:30000
+ca_secret: orderer-secret
+tlsca_endpoint: tls-ca.my-hlf-domain.com:30000
+
+identities:
+  - identity_name: admin
+    identity_secret: ordererAdminpassword
+    identity_type: admin
+  - identity_name: orderer0-orderer
+    identity_secret: orderer0ordererSamplePassword
+    identity_type: orderer
+  - identity_name: orderer1-orderer
+    identity_secret: orderer1ordererSamplePassword
+    identity_type: orderer
+  - identity_name: orderer2-orderer
+    identity_secret: orderer2ordererSamplePassword
+    identity_type: orderer
+
+tools:
+  storageAccessMode: ReadWriteOnce
+  storageSize: "5Gi"
+  storageClass: standard
+
+imagePullSecrets: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

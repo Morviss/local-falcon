@@ -1,0 +1,45 @@
+{{/*
+Copyright National Payments Corporation of India. All Rights Reserved.
+SPDX-License-Identifier:  GPL-3.0
+*/}}
+
+{{- range .Values.orderers }}
+  {{- if not .use_existing_pvc_data }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-{{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+  labels:
+    {{- include "fabric-orderer.labels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  accessModes:
+  - {{ .storageAccessMode | default ($.Values.global.storageAccessMode | default "ReadWriteOnce") }}
+  resources:
+    requests:
+      storage: {{ .dataStorageSize | default ($.Values.global.storageSize | default "5Gi") }}
+  storageClassName: {{ .storageClass | default ($.Values.global.storageClass | default "default") }}
+  {{- end }}
+---
+{{- if (.require_certs_dir_persistence | default $.Values.global.require_certs_dir_persistence) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cert-{{ .name }}-{{ include "fabric-orderer.fullname" $ }}
+  labels:
+    {{- include "fabric-orderer.labels" $ | nindent 4 }}
+    {{- if .additionalLabels -}}
+    {{ toYaml .additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  accessModes:
+  - {{ .storageAccessMode | default ($.Values.global.storageAccessMode | default "ReadWriteOnce") }}
+  resources:
+    requests:
+      storage: {{ .certStorageSize | default ($.Values.global.certStorageSize | default "50M") }}
+  storageClassName: {{ .storageClass | default ($.Values.global.storageClass | default "default") }}
+{{- end }}
+{{- end }}

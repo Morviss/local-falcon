@@ -1,0 +1,206 @@
+[
+    {
+        "name": "rbiTokenCollection",
+        "policy": "OR('rbi.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member')"
+        }
+    },
+    {
+        "name": "tokenplatformTokenCollection",
+        "policy": "OR('tokenplatform.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('tokenplatform.member')"
+        }
+    },
+    {
+        "name": "sbiTokenCollection",
+        "policy": "OR('sbi.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('sbi.member')"
+        }
+    },
+    {
+        "name": "iciciTokenCollection",
+        "policy": "OR('icici.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('icici.member')"
+        }
+    },
+    {
+        "name": "sbiTransferRequestCollection",
+        "policy": "OR('sbi.member','icici.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": false,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('sbi.member')"
+        }
+    },
+    {
+        "name":"auctionCollection",
+        "policy": "OR('tokenplatform.member', 'rbi.member','sbi.member','icici.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('tokenplatform.member', 'rbi.member')"
+        }
+    },
+    {
+        "name": "rbitokenplatformCollection",
+        "policy": "OR('tokenplatform.member', 'rbi.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('tokenplatform.member', 'rbi.member')"
+        }
+    },
+    {
+        "name": "sbirbiRequestsCollection",
+        "policy": "OR('rbi.member', 'sbi.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": true,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'sbi.member')"
+        }
+    },
+    {
+        "name": "icicirbiRequestsCollection",
+        "policy": "OR('rbi.member', 'icici.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": true,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'icici.member')"
+        }
+    },
+    {
+        "name": "archivedTokenCollection",
+        "policy": "OR('rbi.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'tokenplatform.member')"
+        }
+    },
+    {
+        "name": "tokenTxnIdMapCollection",
+        "policy": "OR('rbi.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'tokenplatform.member')"
+        }
+    },
+    {
+        "name": "iciciTransferRequestCollection",
+        "policy": "OR('icici.member','sbi.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": false,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('icici.member','sbi.member')"
+        }
+    },
+    {
+        "name": "sharedBanksCollection",
+        "policy": "OR('rbi.member', 'tokenplatform.member', 'sbi.member', 'icici.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": false,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'tokenplatform.member')"
+        }
+    },
+    {
+        "name":"rbiCashFlowCollection",
+        "policy": "OR('tokenplatform.member', 'rbi.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": false,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'tokenplatform.member')"
+        }
+    },
+    {
+        "name": "rbiauctionplatformCollection",
+        "policy": "OR('rbi.member','sbi.member','icici.member', 'tokenplatform.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": false,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'tokenplatform.member')"
+        }
+    },
+    {
+        "name": "icicirbibidsCollection",
+        "policy": "OR('rbi.member', 'icici.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": true,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'icici.member')"
+        }
+    },
+    {
+        "name": "sbirbibidsCollection",
+        "policy": "OR('rbi.member', 'sbi.member', 'tokenplatform.member')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": true,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('rbi.member', 'sbi.member')"
+        }
+    }
+]

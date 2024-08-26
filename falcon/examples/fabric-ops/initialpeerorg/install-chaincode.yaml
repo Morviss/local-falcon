@@ -1,0 +1,83 @@
+# Default values for ca-user.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: "first-peer"
+fullnameOverride: ""
+project: yourproject
+
+imagePullSecrets: []
+image:
+  repository: npcioss/hlf-builder
+  pullPolicy: IfNotPresent
+  ## Overrides the image tag whose default is the chart appVersion.
+  tag: "2.4"
+
+ica_endpoint: ica-first-peer.my-hlf-domain.com:30000
+tlsca_endpoint: tls-ca.my-hlf-domain.com:30000
+
+filestore_endpoint: http://filestore.my-hlf-domain.com:30001
+filestore_ssl: false # Make it `true` if `filestore_endpoint` is over https.
+channel_block_filename: mychannel.block
+retry_seconds: 10
+
+cc_tar_file: basic-chaincode_go_1.0.tar.gz
+
+hlf_domain: my-hlf-domain.com
+hlf_channel: "mychannel"
+fabric_actions: 
+ install_chaincode: true
+
+csr_names_cn: IN
+csr_names_st: Maharashtra
+csr_names_l: Mumbai
+csr_names_o: Your Company Name
+
+admin_identity:
+  - identity_name: admin
+    identity_secret: first-peerAdminSamplePassword
+    require_msp_enrollment: true
+    require_tls_enrollment: false
+
+peer_identities:
+ - identity_name: peer0-first-peer
+   # peer_endpoint: peer0-first-peer.my-hlf-domain.com:30000 # By default it will use identity_name:peer_internal_service_port
+ - identity_name: peer1-first-peer
+ - identity_name: peer2-first-peer
+
+## .Values.core_peer_mspconfigpath_override - Use only if your admin username is not "admin". 
+## This must be under /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/users/
+## Eg; /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/users/<admin-user>/msp
+# core_peer_mspconfigpath_override: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/users/admin-first-peer/msp
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+  # fsGroup: 2000
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
